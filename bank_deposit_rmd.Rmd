@@ -31,19 +31,19 @@ For bank marketing campaigns the main interest is to open a checking/savings acc
 A term deposit account is an account that the bank or financial institution offers with a fixed rate, and the money will be returned after the maturity time specified in the offer. The term deposit account often offers better rate than a regular account. 
 
 
-### 1.1 Data Source
+## 1.1 Data Source
 
 This dataset is a direct marketing campaign of a Portugese banking institution. The marketing campaigns were based on phone calls where multiple contacts were made to the same client. The dataset was downloaded from the Kaggle website. However, the website mentions that data was originally uploaded in the UCI Machine Learning Repository. The dataset gives information to analyze and find ways for strategies to improve future marketing campaigns for the bank.
 
 Kaggle Dataset: https://www.kaggle.com/janiobachmann/bank-marketing-dataset
 
 
-### 1.2 Project Goal
+## 1.2 Project Goal
 
 The primary goal of the project is to analyze data, identify patterns and predict which clients will open a term deposit account. The dependent variable is the outcome with two labels: "yes" or "no" to opening term deposit, hence the project uses Supervised Learning Classification.
 
 
-### 1.3 Process Methodology
+## 1.3 Process Methodology
 
 The process followed in the data analysis can be broadly classified into the following categories and this document follows a similar order.
 
@@ -124,22 +124,21 @@ This dataset did not have any missing values or duplicated rows. The data is in 
 
 ```{r dup}
 sum(is.na(bank_data))
-
 nrow(unique(bank_data))
-
 summary(bank_data)
 ```
 
 A summary on all the columns of the dataset shows a preliminary spread of the data. It can be seen that the balance is negative for few customers. The pdays column has negative values at -1 for more than half of the customers indicating that more than half the customers were not contacted in the previous campaign. By running the following commands this has been verified through the previous column.
          
         table(bank_data$pdays)
-
         table(bank_data$previous)
 
 
 ## 2.4 Installing Packages and Libraries
 
-```{r pkg echo=FALSE}
+The different packages and libraries needed to run the R code for data analysis will be loaded if the user does not have them already. The analysis uses the $tidyverse, gridExtra, caret, knitr, randomForest, MLmetrics$ and $ROCR $ packages.
+
+```{r pkg, include=FALSE}
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(gridExtra)) install.packages("gridExtra", repos = "http://cran.us.r-project.org")
 if(!require(caret)) install.packages("caret", repos = "http://cran.us.r-project.org")
@@ -176,9 +175,7 @@ The customers were aged between 18 and 95 years with a median age of 39years. Th
 
 ```{r age}
 median(bank_data$age)
-
 min(bank_data$age)
-
 max(bank_data$age)
 
 dist<-bank_data%>%
@@ -187,7 +184,7 @@ dist<-bank_data%>%
   ggplot(aes(x=age, y=n))+
   geom_line()+
   xlab("Age")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle(" Total Distribution of Age")
 
 dist_dep<-bank_data%>%
@@ -196,20 +193,20 @@ dist_dep<-bank_data%>%
   ggplot(aes(x=age, y=deposit_pct))+
   geom_bar(stat="identity")+
   xlab("Age")+
-  ylab("Percent of people deposited")+
+  ylab("Percent of customers deposited")+
   ggtitle(" Deposit percentage across Age")
 
 grid.arrange(dist, dist_dep, ncol=1)
 
 ```
 
-Most people above 60 years and less than 25 years prefer to deposit. It can also be seen that though there are more people around 30-50 years of age, a less percentage of them choose to deposit. Marketing campaigns should try to target this age group to increase customer base and continue to support the above 60 years and below 25 years age groups to retain customers.
+Most customers above 60 years and less than 25 years prefer to deposit. It can also be seen that though there are more customers around 30-50 years of age, a less percentage of them choose to deposit. Marketing campaigns should try to target this age group to increase customer base and continue to support the above 60 years and below 25 years age groups to retain customers.
 
 
 
 ## 3.2 Education and Marital Status
 
-Data Visualizations of different educational backgrounds and marital status revealed that people with secondary and tertiary education have shown most interest in depositing. The tertiary education group has a higher percent than the secondary education group of deposits.
+Data Visualizations of different educational backgrounds and marital status revealed that customers with secondary and tertiary education have shown most interest in depositing. The tertiary education group has a higher percent than the secondary education group of deposits.
 
 ```{r em}
 e<-bank_data%>%
@@ -217,7 +214,7 @@ e<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution")+
   xlab("Education")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -226,7 +223,7 @@ m<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution")+
   xlab("Marital Status")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -234,14 +231,14 @@ grid.arrange(e,m, nrow=1)
 
 ```
 
-The number of deposits made by married people though higher than the others has a lower percent as more number of married people chose not to deposit.
+The number of deposits made by married customers though higher than the others has a lower percent as more number of married customers chose not to deposit.
 
-Marketing campaigns should hence target the secondary education group and married group of people to increase customers.
+Marketing campaigns should hence target the secondary education group and married group of customers to increase customers.
 
 
 ## 3.3 Job
 
-People with Management jobs and people who have retired are two groups that show higher interest in depositing though technicians and admin jobs are not far behind.
+Customers with Management jobs and customers who have retired are two groups that show higher interest in depositing though technicians and admin jobs are not far behind.
 
 ```{r job}
 bank_data%>%
@@ -249,7 +246,7 @@ bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution of Deposits with Job")+
   xlab("Job")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 bank_data%>%
@@ -262,21 +259,21 @@ bank_data%>%
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 ```
 
-The above plot shows the distribution of jobs across different ages. Based on the two graphs, retired people and students have shown lot of interest in doing deposits.
+The above plot shows the distribution of jobs across different ages. Based on the two graphs, retired customers and students have shown lot of interest in doing deposits.
 
 
 ## 3.4 Loans and Credit default
 
-The dataset consists of three financial categories - the home loan, the personal loan and credit default - that can potentially help in understanding if a person will do a deposit. Since most people do not have credit defaults, even though it shows that people with defaults almost do not deposit, this variable is not the strongest predictor. However, having a housing loan can give more insights. A higher percent of people without housing loan, tend to deposit than the ones having a housing loan. Also, when having a personal loan lesser number of people tend to deposit.
+The dataset consists of three financial categories - the home loan, the personal loan and credit default - that can potentially help in understanding if a person will do a deposit. Since most customers do not have credit defaults, even though it shows that customers with defaults almost do not deposit, this variable is not the strongest predictor. However, having a housing loan can give more insights. A higher percent of customers without housing loan, tend to deposit than the ones having a housing loan. Also, when having a personal loan lesser number of customers tend to deposit.
 
-The Marketing campaign should specifically segment the population to take these prior financial situations into consideration to approach the customers.
+The Marketing Campaign should specifically segment the population to take these prior financial situations into consideration to approach the customers.
 
 ```{r loan}
 h<-bank_data%>%
   ggplot(aes(x=housing,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("House Loans")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -284,14 +281,14 @@ l<-bank_data%>%
   ggplot(aes(x=loan,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Personal Loans")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 d<-bank_data%>%
   ggplot(aes(x=default,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Credit Default")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 grid.arrange(h,l,d, nrow=1)
@@ -301,7 +298,7 @@ grid.arrange(h,l,d, nrow=1)
 
 ## 3.5 Contact type
 
-The type of contact chart shows that mostly cellular contact was used and had better success than the others.
+The $type of contact$ chart shows that mostly cellular contact was used and had better success than the others.
 
 ```{r contact}
 bank_data%>%
@@ -309,7 +306,7 @@ bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution of Deposits with different types of contact")+
   xlab("Type of Contact")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -319,7 +316,7 @@ bank_data%>%
 
 ## 3.6 Contacts for current campaign
 
-May seems to be the month with maximum contacts to people, though it resulted in lesser percent of deposits compared to October, September, April, December and February.
+May seems to be the month with maximum contacts to customers, though it resulted in lesser percent of deposits compared to October, September, April, December and February.
 
 ```{r this}
 mon<-bank_data%>%
@@ -327,7 +324,7 @@ mon<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle("Last contact month")+
   xlab("Months")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 day<-bank_data%>%
@@ -335,7 +332,7 @@ day<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle("Last contact day")+
   xlab("Days")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 grid.arrange(mon, day, nrow=1)
@@ -344,7 +341,7 @@ bank_data%>%
   ggplot(aes(x=campaign,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Number of contacts")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle("Number of contacts for current campaign")
 
 ```
@@ -361,7 +358,7 @@ bank_data%>%
   ggplot(aes(x=poutcome,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Previous Campaign Outcome")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle(" Distribution of Deposits with previous outcomes")
 
 
@@ -370,14 +367,14 @@ bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Days since last contact")+
   xlab("Days since last contact")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   xlim(c(0,400))
 
 bank_data%>%
   ggplot(aes(x=previous,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Number of contacts")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle(" Contacts before this campaign")
 
 ```  
@@ -387,7 +384,7 @@ The number of days since last contact shows local maximums indicating that conta
   
 ## 3.8 Bank Balance
 
-Bank balance is an important factor to be able to do a deposit. It varied from -6,847 to 81,204 with median balance of 550. The below chart shows that the most balances were from 100 to 1,100 and the median balance of people who deposited was slightly higher than the people who did not deposit.
+Bank balance is an important factor to be able to do a deposit. It varied from -6,847 to 81,204 with median balance of 550. The below chart shows that the most balances were from 100 to 1,100 and the median balance of customers who deposited was slightly higher than the customers who did not deposit.
 
 ```{r bal}
 median(bank_data$balance)
@@ -478,6 +475,7 @@ cor(bank_data[,c("previous", "campaign","pdays", "age", "balance")], bank_data$d
 
 The corelation heatmap also shows that most variables are correlated with each other. Though some correlations were not very significant.
 
+\pagebreak
 
 # 4 Data Analysis & Methods
 
@@ -514,7 +512,7 @@ This dataset uses Supervised Classification algorithms to run different models. 
 
 The table giving the correct and wrong values is called the Confusion Matrix as shown below. True Positives and True Negatives are the correct predictions. False Negatives are the actual positives that got wrongly got predicted negative whereas False positives are the actual negatives that got wrongly predicted positive. The other measures can be defined as shown below.
 
-```{r cm echo=FALSE }
+```{r cm, echo=FALSE }
 cm_table<-c("True Negative (TN)", "False Negative (FN)")
 cm_table<-rbind(cm_table, c("False Positive (FP)", "True Positive (TP)"))
 cm_table<-as.data.frame(cm_table)
@@ -527,14 +525,15 @@ cm_table
 
 
 $$ Accuracy = \frac{TN+TP}{TN+TP+FN+FP} $$
+$$ False\ Positive\ Rate (FPR)= \frac{FP}{FP+TN} $$
 
-$$ Precision = \frac{TP}{TP+FP} $$
+$$ Precision\ or\ True\ Positive\ Rate (TPR) = \frac{TP}{TP+FP} $$
 $$ Recall = \frac{TP}{TP+FN} $$
 $$ F Score = 2. \frac{Precison . Recall}{Precision+Recall} $$
 
-The area under the curve AUC is the area under the curve of precision Vs recall curve. This curve is obtained by using different cutoff values to determine the class labels.
-Since this curve compares different cutoff points, it is a much better measuring parameter. There are many functions already available in R that give these metrics however the below user-defined function was used in this project.
-Different models are compared to find the highest Area under the curve. The chosen model is then fine tuned with cut-off analysis to apply on the evaluation set.
+The area under the curve AUC is the area under the ROC(Receiver Operating Characteristic) curve which is a probability curve. The AUC tells how much the model is capable of distinguishing between the classes. The higher the AUC better the model is at predicting the classes. This curve is plotted with TPR(True Positive Rate) on the y-axis against the FPR(False Positive Rate) on the x-axis. The different points on the curve are obtained by using different cutoff values to determine the class labels.
+
+There are many functions already available in R that give these metrics however the below user-defined function was used in this project. Different models are compared to find the highest Area under the curve. The chosen model is then fine tuned with cut-off analysis to apply on the evaluation set.
 
 ```{r cmfunc}
 get_result_stats<-function(x,y){
@@ -562,7 +561,7 @@ The KNN model is a classification model that assigns to a class that is most com
 ctrl <- trainControl(method = "cv",
                      number = 5,
                      allowParallel = TRUE)
-                     
+set.seed(123)                     
 model_knn<-  train(deposit~., data=trainset, method = "knn", 
                    trControl = ctrl, tuneGrid = data.frame(k = seq(3, 50, 2)))
 model_knn$bestTune
@@ -580,12 +579,14 @@ all_results<-data.frame(method="Baseline: KNN", f1score=knn_summary$f1score,
                                            precision=knn_summary$precision,
                                            recall=knn_summary$recall, 
                                            AUC=round(knn_auc@y.values[[1]],6))
+all_results%>%knitr::kable()
 
 roc.perf.knn = performance(pred.knn, measure = "tpr", x.measure = "fpr")
-plot(roc.perf, main="KNN ROC Curve")
+plot(roc.perf.knn, main="KNN ROC Curve")
 abline(a=0, b= 1)
 ```
-As can be seen above, the optimum $k$ value can be obtained from the chart. The accuracy at 54%, Fscore 0.497 and area under the curve 0.5625. The above plot shows the area under the curve. Ideally, it is desired to see the curve in the upper left corner. This model has been used as baseline model to compare improvement and performance of other models. 
+
+As can be seen above, the optimum $k$ value can be obtained from the chart. The above plot shows the area under the curve. Ideally, it is desired to see the curve in the upper left corner. This model gave an accuracy of 0.55, AUC of 0.576 and Fscore of 0.489. This model has been used as baseline model to compare improvement and performance of other models. 
 
 
 ### 4.3.2 Naive- Bayes (NB)
@@ -599,7 +600,8 @@ $$ P(A/B) = \frac{P(B/A) . P(A)}{P(B)} $$
 The Naive Bayes algorithm is fast and easy to implement but the biggest disadvantage is that in real life cases the predictors can be dependent which impacts the classification.
 
 
-```{r knn}
+```{r nb}
+set.seed(123)
 model_nb<-  train(deposit~., data=trainset, method = "naive_bayes", 
                    trControl = ctrl)
 
@@ -617,6 +619,8 @@ all_results<-rbind(all_results, data.frame(method="Naive Bayes",
                                            precision=nb_summary$precision,
                                            recall=nb_summary$recall,
                                            AUC=round(nb_auc@y.values[[1]],6)))
+all_results%>%knitr::kable()
+
 ```
 
 The accuracy, Fscore and area under the curve(AUC) have all shown improvement.
@@ -627,12 +631,14 @@ The accuracy, Fscore and area under the curve(AUC) have all shown improvement.
 Logistic Regression is a classification algorithm used to assign observations to a discrete set of classes. The algorithm is based on the concept of probability and can be called linear regression model which uses a more complex function like the sigmoid or logistic function that takes an S shaped curve to classify. 
 
 ```{r glm1}
+set.seed(123)
 model_glm<-  train(deposit~., data=trainset, method = "glm", 
                    trControl = ctrl)
 
 model_glm$finalModel
 ```
-The coefficients for the logistic regression analysis can be seen above.
+
+The coefficients for the logistic regression analysis can be seen above. From the coefficients, those that contribute the most can be seen to have higher coefficients like the $jobretired$, $jobstudent$, $poutcomesuccess$, and few months.
 
 ```{r glm2}
 glm_dep<-predict(model_glm, testset)
@@ -661,12 +667,14 @@ CART is classification and regression trees for machine learning. It uses a deci
 
 
 ```{r cart}
+set.seed(123)
 model_tree<-  train(deposit~., data=trainset, method="rpart", 
                     tuneGrid= data.frame(cp=seq(0, 0.5, 0.05)),
                     trControl = ctrl)
 model_tree$bestTune
 ggplot(model_tree)
 ```
+
 Fine tuning of hyper-parameter called complexity paramater $cp$ has shown that the cp=0 yielded best results.
 
 ```{r cart2}
@@ -694,6 +702,7 @@ Based on the results it can be seen that though the Fscore has improved, the dro
 Random Forest is a flexible machine learning algorithm that even without hyper-parameter tuning yields a great result most times. It is an example of ensemble model, which is a collection of multiple models to predict best outcomes that individual models fail to do by themselves. The "forest" is an ensemble of multiple "trees" that are combined together and increase overall results. This method is also called "bagging" method.
 
 ``` {r rf}
+set.seed(123)
 model_rf<-  randomForest(deposit~., data=trainset,  mtry=4,
                    trControl = ctrl)
 
@@ -714,9 +723,9 @@ all_results<-rbind(all_results, data.frame(method="Random Forest",
 all_results%>%knitr::kable()
 ```
 
-The results summary shows improvement and that the classification has evened out the loss seen in the CART algorithm.
+The results summary shows improvement in all measures and that the classification has evened out the loss seen in the CART algorithm.
 
-```{r cart}
+```{r varimp}
 varImpPlot(model_rf)
 
 ```
@@ -732,10 +741,11 @@ gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9),
                         n.trees = (1:30)*50, 
                         shrinkage = 0.1,
                         n.minobsinnode = 20)
+set.seed(123)
 model_gbm<-  train(deposit~., data=trainset, method="gbm",
                    trControl = ctrl, tuneGrid = gbmGrid)
 
-```{r gbm include=FALSE}
+```{r gbm, include=FALSE}
 gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9), 
                         n.trees = (1:30)*50, 
                         shrinkage = 0.1,
@@ -765,7 +775,7 @@ all_results<-rbind(all_results, data.frame(method="Gradient Boost",
 all_results%>%knitr::kable()
 ```
 
-The gradient boosting algorithm which is also an ensemble model shows improvement in the area under the curve over the Random Forest model. 
+The gradient boosting algorithm which is also an ensemble model shows slight improvement in the area under the curve over the Random Forest model. 
 
 ```{r gbm3}
 # plot ROC curve for different cutoff values
@@ -787,13 +797,13 @@ abline(a=0, b= 1)
 
 ### 4.3.6 Model Results
 
-The final summary of all models shows that overall the Gradient Boost model shows the best performance with respect to area under the curve. From the below table it can be seen that the best area under the curve is 0.7936. Hence this model has been used as the final model.
+The final summary of all models shows that overall the Gradient Boost model shows the best performance with respect to area under the curve. Hence this model has been used as the final model.
 
 ```{r sum}
 all_results%>%knitr::kable()
 ```
 
-To fine tune the model cut-off analysis has been performed. Cut-off Analysis basically analyzes the different cut-off levels that determine the class labels. In this case there are two two labels, hence default cutoff is 0.5. By sweeping different values of cut-off and measuring maximum Fscore the optimum cut-off value can be obtained. The user-defined function can be written as shown below.
+To fine tune the model cut-off analysis has been performed. Cut-off Analysis basically analyzes the different cut-off levels that determine the class labels. In this case, there are two labels, hence default cutoff is 0.5. By sweeping different values of cut-off and measuring maximum Fscore the optimum cut-off value can be obtained. The user-defined function can be written as shown below.
 
 ```{r cutoff}
 get_cutoff<-function(x){
@@ -828,12 +838,13 @@ all_results%>%knitr::kable()
 
 final_cutoff
 ```
-The above table shows that the FScore has improved to 0.72. A cut-off value of 0.375 has given best Fscore. The GBM model with cutoff 0.375 is the final model result that can be applied to new data to determine if a term deposit will be made.
+
+The above table shows that the FScore has improved to 0.712. A cut-off value of 0.375 has given best Fscore. The GBM model with cutoff 0.375 is the final model that can be applied to new data to determine if a term deposit will be made.
 
 
 ### 4.3.7 Evaluation Data Results
 
-The GBM model with cut-off 0.375 has been applied to the evaluation dataset and shown an accuracy of 0.712 with FScore of 0.7133.
+The GBM model with cut-off 0.375 has been applied to the evaluation dataset and shown an accuracy of 0.7138 with FScore of 0.7136. These values are very close to the training/testing model and hence prove that the model is not over-trained or under-trained.
 
 ```{r evalset}
 
@@ -846,7 +857,9 @@ evalset_deposit<-ifelse(eval_y>final_cutoff,1,0)
 final_summary<-get_result_stats(evalset_deposit, evalset$deposit)
 
 # Final summary of the evaluation of the model put in easy to read format
-data.frame(F1Score=final_summary$f1score, Accuracy=final_summary$acc, Precision=final_summary$precision, 
+data.frame(F1Score=final_summary$f1score, 
+           Accuracy=final_summary$acc, 
+           Precision=final_summary$precision, 
            Recall=final_summary$recall)
 
 ```
@@ -861,14 +874,15 @@ This section outlines the final summary of the project and future work.
 
 Data analysis of the Portugese banking institution's dataset obtained from Kaggle website has shown that the marketing campaign can leverage the key insights generated to optimally target the customer base and effectively increase the term deposits.
 
-The Gradient Boosting algorithm has shown the best results with Fscore of 0.7133 for predicting if a person will do a term deposit. 
+The Gradient Boosting algorithm has shown the best results with Fscore of 0.7136 for predicting if a person will do a term deposit. 
 
 
 ## 5.2 Future Work
 
-In order to further understand the behavior of customer choices for success and failure, competitive benchmarking data can also be included along with demographics. Also, the dataset on Kaggle website seems to be a subset of the original data uploaded to UCI ML website, hence extending the analysis to include the full-set can give further insights. 
+In order to further understand the behavior of customer choices for success and failure, competitive benchmarking data can also be included along with demographics. Also, the dataset on Kaggle website seems to be a subset of the original data uploaded to UCI Machine Learning Repository, hence extending the analysis to include the full-set can give further insights. 
 
-To increase the predictive power of the model, machine learning concepts like the SVM, Neural Networks and ensemble model techniques like Stacking and Blending can be evaluated.
+To increase the predictive power of the model, machine learning concepts like the SVM, Neural Networks and Ensemble model techniques like Stacking and Blending can be evaluated.
+
 
 # 6 References
 

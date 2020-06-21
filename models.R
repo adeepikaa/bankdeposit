@@ -11,9 +11,9 @@ bank_data_ml<-bank_data[, -c(12, 14)]
 set.seed(123)
 
 # use 20% as evalset which will be used on final model to report performance 
-test_index <- createDataPartition(bank_data_ml$deposit, times = 1, p = 0.2, list = FALSE)
-temp <- bank_data_ml[-test_index,]
-evalset <- bank_data_ml[test_index,]
+eval_index <- createDataPartition(bank_data_ml$deposit, times = 1, p = 0.2, list = FALSE)
+temp <- bank_data_ml[-eval_index,]
+evalset <- bank_data_ml[eval_index,]
 
 
 set.seed(123)
@@ -52,6 +52,7 @@ ctrl <- trainControl(method = "cv",
 # KNN model 
 
 # use caret package, with cross-validation and fine tune for k
+set.seed(123)
 model_knn<-  train(deposit~., data=trainset, method = "knn", 
                    trControl = ctrl, tuneGrid = data.frame(k = seq(3, 50, 2)))
 
@@ -80,13 +81,14 @@ abline(a=0, b= 1)
 all_results<-data.frame(method="Baseline: KNN", f1score=knn_summary$f1score,
                         accuracy=knn_summary$acc, precision=knn_summary$precision,
                                            recall=knn_summary$recall, AUC=round(knn_auc@y.values[[1]],6))
-
+all_results%>%knitr::kable()
 
 ##################################################################################
 
 # Naive Bayes model 
 
 # use caret package, with cross-validation 
+set.seed(123)
 model_nb<-  train(deposit~., data=trainset, method = "naive_bayes", 
                    trControl = ctrl)
 
@@ -113,6 +115,7 @@ all_results%>%knitr::kable()
 # Logistic Regression model 
 
 # use caret package, with cross-validation 
+set.seed(123)
 model_glm<-  train(deposit~., data=trainset, method = "glm", 
                    trControl = ctrl)
 
@@ -141,6 +144,7 @@ all_results%>%knitr::kable()
 # CART: Tree model 
 
 # use caret package, with cross-validation and fine tune for cp(complex parameter)
+set.seed(123)
 model_tree<-  train(deposit~., data=trainset, method="rpart", tuneGrid= data.frame(cp=seq(0, 0.5, 0.05)),
                          trControl = ctrl)
 # best value of cp
@@ -173,6 +177,7 @@ all_results%>%knitr::kable()
 # Random Forest model 
 
 # the randomForest package is used with cross-validation k-fold=5
+set.seed(123)
 model_rf<-  randomForest(deposit~., data=trainset,  mtry=4,
                    trControl = ctrl)
 
@@ -208,6 +213,7 @@ gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9),
                         n.trees = (1:30)*50, 
                         shrinkage = 0.1,
                         n.minobsinnode = 20)
+set.seed(123)
 model_gbm<-  train(deposit~., data=trainset, method="gbm",
                    trControl = ctrl, tuneGrid = gbmGrid)
 
@@ -278,6 +284,8 @@ all_results<-rbind(all_results, data.frame(method="Gradient Boost(Cut-off analys
                                            recall=final_stats$recall, AUC=round(gbm_auc@y.values[[1]],6)))
 
 all_results%>%knitr::kable()
+
+final_cutoff
 
 #####################################################################
 # Final Model on the evaluation dataset

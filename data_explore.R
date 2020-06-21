@@ -17,7 +17,7 @@ dist<-bank_data%>%
   ggplot(aes(x=age, y=n))+
   geom_line()+
   xlab("Age")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle(" Total Distribution of Age")
 
 dist_dep<-bank_data%>%
@@ -26,7 +26,7 @@ dist_dep<-bank_data%>%
   ggplot(aes(x=age, y=deposit_pct))+
   geom_bar(stat="identity")+
   xlab("Age")+
-  ylab("Percent of people deposited")+
+  ylab("Percent of customers deposited")+
   ggtitle(" Deposit percentage across Age")
 
 grid.arrange(dist, dist_dep, ncol=1)
@@ -40,7 +40,7 @@ e<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution")+
   xlab("Education")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -49,7 +49,7 @@ m<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution")+
   xlab("Marital Status")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -64,7 +64,7 @@ bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution of Deposits with Job")+
   xlab("Job")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 bank_data%>%
@@ -84,7 +84,7 @@ h<-bank_data%>%
   ggplot(aes(x=housing,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("House Loans")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 
@@ -92,14 +92,14 @@ l<-bank_data%>%
   ggplot(aes(x=loan,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Personal Loans")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 d<-bank_data%>%
   ggplot(aes(x=default,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Credit Default")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 grid.arrange(h,l,d, nrow=1)
@@ -112,7 +112,7 @@ bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Distribution of Deposits with different types of contact")+
   xlab("Type of Contact")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 ###########################################
@@ -124,7 +124,7 @@ mon<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle("Last contact month")+
   xlab("Months")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 day<-bank_data%>%
@@ -132,7 +132,7 @@ day<-bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle("Last contact day")+
   xlab("Days")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   theme(axis.text.x = element_text(face = "bold",
                                    size = 10, angle = 45, hjust = 1, vjust = 1))
 grid.arrange(mon, day, nrow=1)
@@ -141,7 +141,7 @@ bank_data%>%
   ggplot(aes(x=campaign,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Number of contacts")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle("Number of contacts for current campaign")
 
 ###########################################
@@ -151,7 +151,7 @@ bank_data%>%
   ggplot(aes(x=poutcome,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Previous Campaign Outcome")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle(" Distribution of Deposits with previous outcomes")
 
 
@@ -160,14 +160,14 @@ bank_data%>%
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   ggtitle(" Days since last contact")+
   xlab("Days since last contact")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   xlim(c(0,400))
 
 bank_data%>%
   ggplot(aes(x=previous,  group=deposit, fill=deposit))+
   geom_histogram(stat="count", bins=20, col="black", position="dodge")+
   xlab("Number of contacts")+
-  ylab("Total number of people")+
+  ylab("Total number of customers")+
   ggtitle(" Contacts before this campaign")
 
 
