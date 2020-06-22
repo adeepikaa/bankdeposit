@@ -1,0 +1,19 @@
+The files in this repository are described here. The R code was worked in a modular style hence the multiple files.
+However, for submission the code was combined.
+
+
+bank_deposit_final.R    : Final R code for the Analysis
+
+bank_deposit_final.Rmd  : Final Markdown file of the report
+
+bank_deposit_final.pdf  : PDF report of the Analysis
+
+bankdeposit.csv         : Data file downloaded from Kaggle
+
+data_explore.R          : Data exploration & visualization code
+
+ensemble.R              : Code for exploring ensemble models, however not used for final submission
+
+models.R                : Code for model analysis and evaluation
+
+read_data.R             : Code for reading data and initial setup
