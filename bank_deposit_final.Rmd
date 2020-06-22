@@ -63,6 +63,7 @@ The process followed in the data analysis can be broadly classified into the fol
   
   -Future Work
   
+
 \pagebreak
 
 # 2. Data Wrangling
@@ -491,13 +492,13 @@ The $pdays$ and $duration$ column have been removed to run predictive analysis. 
 ```{r data}
 bank_data_ml<-bank_data[, -c(12, 14)]
 
-set.seed(123)
+set.seed(123, sample.kind="Rounding")
 
-eval_index <- createDataPartition(bank_data_ml$deposit, times = 1, p = 0.2, list = FALSE)
-temp <- bank_data_ml[-eval_index,]
-evalset <- bank_data_ml[eval_index,]
+test_index <- createDataPartition(bank_data_ml$deposit, times = 1, p = 0.2, list = FALSE)
+temp <- bank_data_ml[-test_index,]
+evalset <- bank_data_ml[test_index,]
 
-set.seed(123)
+set.seed(123, sample.kind="Rounding")
 
 test_index <- createDataPartition(temp$deposit, times = 1, p = 0.2, list = FALSE)
 trainset <- temp [-test_index,]
@@ -561,7 +562,7 @@ The KNN model is a classification model that assigns to a class that is most com
 ctrl <- trainControl(method = "cv",
                      number = 5,
                      allowParallel = TRUE)
-set.seed(123)                     
+set.seed(123, sample.kind="Rounding")                     
 model_knn<-  train(deposit~., data=trainset, method = "knn", 
                    trControl = ctrl, tuneGrid = data.frame(k = seq(3, 50, 2)))
 model_knn$bestTune
@@ -584,12 +585,321 @@ all_results%>%knitr::kable()
 roc.perf.knn = performance(pred.knn, measure = "tpr", x.measure = "fpr")
 plot(roc.perf.knn, main="KNN ROC Curve")
 abline(a=0, b= 1)
-
-eval_index
-
-test_index
 ```
 
-As can be seen above, the optimum $k$ value can be obtained from the chart. The above plot shows the area under the curve. Ideally, it is desired to see the curve in the upper left corner. This model gave an accuracy of 0.55, AUC of 0.576 and Fscore of 0.489. This model has been used as baseline model to compare improvement and performance of other models. 
+As can be seen above, the optimum $k$ value can be obtained from the chart. The above plot shows the area under the curve. Ideally, it is desired to see the curve in the upper left corner. This model gave an accuracy of 0.552, AUC of 0.576 and Fscore of 0.489. This model has been used as baseline model to compare improvement and performance of other models. 
 
+
+### 4.3.2 Naive- Bayes (NB)
+
+Naive-Bayes algorithm is a probabilistic machine learning algorithm used for classification. It assumes that the predictors or features are independent (hence called naive). The algorithm is based on the Bayes theorem which states that the probability of event A happening given event B is happening can be calculated.
+
+Bayes Theorem:
+
+$$ P(A/B) = \frac{P(B/A) . P(A)}{P(B)} $$ 
+
+The Naive Bayes algorithm is fast and easy to implement but the biggest disadvantage is that in real life cases the predictors can be dependent which impacts the classification.
+
+
+```{r nb}
+set.seed(123, sample.kind="Rounding")
+model_nb<-  train(deposit~., data=trainset, method = "naive_bayes", 
+                   trControl = ctrl)
+
+nb_dep<-predict(model_nb, testset)
+
+nb_summary<-get_result_stats(nb_dep, testset$deposit)
+
+nb_y<- predict(model_nb, testset, type="prob")[,2]
+pred <- prediction(nb_y, testset$deposit)
+nb_auc = performance(pred, measure = "auc")
+
+all_results<-rbind(all_results, data.frame(method="Naive Bayes", 
+                                           f1score=nb_summary$f1score,
+                                           accuracy=nb_summary$acc,
+                                           precision=nb_summary$precision,
+                                           recall=nb_summary$recall,
+                                           AUC=round(nb_auc@y.values[[1]],6)))
+all_results%>%knitr::kable()
+
+```
+
+The accuracy, Fscore and area under the curve(AUC) have all shown improvement.
+
+
+### 4.3.3 Logistic Regression (GLM)
+
+Logistic Regression is a classification algorithm used to assign observations to a discrete set of classes. The algorithm is based on the concept of probability and can be called linear regression model which uses a more complex function like the sigmoid or logistic function that takes an S shaped curve to classify. 
+
+```{r glm1}
+set.seed(123, sample.kind="Rounding")
+model_glm<-  train(deposit~., data=trainset, method = "glm", 
+                   trControl = ctrl)
+
+model_glm$finalModel
+```
+
+The coefficients for the logistic regression analysis can be seen above. From the coefficients, those that contribute the most can be seen to have higher coefficients like the $jobretired$, $jobstudent$, $poutcomesuccess$, and few months.
+
+```{r glm2}
+glm_dep<-predict(model_glm, testset)
+glm_summary<-get_result_stats(glm_dep, testset$deposit)
+
+glm_y<- predict(model_glm, testset, type="prob")[,2]
+pred <- prediction(glm_y, testset$deposit)
+glm_auc = performance(pred, measure = "auc")
+
+all_results<-rbind(all_results, data.frame(method="Logistic Regression",  
+                                           f1score=glm_summary$f1score,
+                                           accuracy=glm_summary$acc,
+                                           precision=glm_summary$precision,
+                                           recall=glm_summary$recall,
+                                           AUC=round(glm_auc@y.values[[1]],6)))
+
+all_results%>%knitr::kable()
+```
+
+The Logistic regression algorithm though has dropped the recall rate, overall has further improved the classification as all other metrics have shown improvement. 
+
+
+### 4.3.4 Classification and Regression Trees (CART)
+
+CART is classification and regression trees for machine learning. It uses a decision tree as a predictive model to change observations to conclusions based on the binary outcome at each node in the tree.
+
+
+```{r cart}
+set.seed(123, sample.kind="Rounding")
+model_tree<-  train(deposit~., data=trainset, method="rpart", 
+                    tuneGrid= data.frame(cp=seq(0, 0.5, 0.05)),
+                    trControl = ctrl)
+model_tree$bestTune
+ggplot(model_tree)
+```
+
+Fine tuning of hyper-parameter called complexity paramater $cp$ has shown that the cp=0 yielded best results.
+
+```{r cart2}
+tree_dep<-predict(model_tree, testset)
+tree_summary<-get_result_stats(tree_dep, testset$deposit)
+
+tree_y<- predict(model_tree, testset, type="prob")[,2]
+pred <- prediction(tree_y, testset$deposit)
+tree_auc = performance(pred, measure = "auc")
+
+all_results<-rbind(all_results, data.frame(method="CART", f1score=tree_summary$f1score,
+                                           accuracy=tree_summary$acc,
+                                           precision=tree_summary$precision,
+                                           recall=tree_summary$recall,
+                                           AUC=round(tree_auc@y.values[[1]],6)))
+all_results%>%knitr::kable()
+
+```
+
+Based on the results it can be seen that though the Fscore has improved, the drop in the recall rate has impacted the area under the curve. This also indicates that probably one tree is not enough and having multiple trees may even out the classification. 
+
+
+### 4.3.5 Random Forest (RF)
+
+Random Forest is a flexible machine learning algorithm that even without hyper-parameter tuning yields a great result most times. It is an example of ensemble model, which is a collection of multiple models to predict best outcomes that individual models fail to do by themselves. The "forest" is an ensemble of multiple "trees" that are combined together and increase overall results. This method is also called "bagging" method.
+
+``` {r rf}
+set.seed(123, sample.kind="Rounding")
+model_rf<-  randomForest(deposit~., data=trainset,  mtry=4,
+                   trControl = ctrl)
+
+rf_dep<-predict(model_rf, testset)
+
+rf_summary<-get_result_stats(rf_dep, testset$deposit)
+
+rf_y<- predict(model_rf, testset, type="prob")[,2]
+pred <- prediction(rf_y, testset$deposit)
+rf_auc = performance(pred, measure = "auc")
+
+all_results<-rbind(all_results, data.frame(method="Random Forest",
+                                           f1score=rf_summary$f1score,
+                                           accuracy=rf_summary$acc,
+                                           precision=rf_summary$precision,
+                                           recall=rf_summary$recall,
+                                           AUC=round(rf_auc@y.values[[1]],6)))
+all_results%>%knitr::kable()
+```
+
+The results summary shows improvement in all measures and that the classification has evened out the loss seen in the CART algorithm.
+
+```{r varimp}
+varImpPlot(model_rf)
+
+```
+
+The variable importance plot shows the order in which the different predictors have influenced the classification. The balance in a person's account and what time the contact was made were some important predictors other than age and job among others.
+
+
+### 4.3.6 Gradient Boosting (GBM)
+
+Gradient Boosting algorithm is method of converting weak predictions to strong. The algorithm begins by training a decision tree and use the residual loss function to assign weights to observations that are difficult to classify. The next tree improves predictions on these difficult observations and re-computes loss function for subsequent trees. Prediction of the final ensemble model is therefore the weighted sum of predictions made by the previous models. The caret package's train function is used for modeling with hyper-parameters $interaction.depth$ and $n.trees$. Interaction depth specifies the maximum depth of each tree i.e. that highest level of variable interactions allowed while training the model. $n.trees$ is the number of trees used for classification.
+
+gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9), 
+                        n.trees = (1:30)*50, 
+                        shrinkage = 0.1,
+                        n.minobsinnode = 20)
+set.seed(123, sample.kind="Rounding")
+model_gbm<-  train(deposit~., data=trainset, method="gbm",
+                   trControl = ctrl, tuneGrid = gbmGrid)
+
+```{r gbm, include=FALSE}
+gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9), 
+                        n.trees = (1:30)*50, 
+                        shrinkage = 0.1,
+                        n.minobsinnode = 20)
+set.seed(123, sample.kind="Rounding")
+model_gbm<-  train(deposit~., data=trainset, method="gbm",
+                   trControl = ctrl, tuneGrid = gbmGrid)
+```
+
+```{r gbm2}
+model_gbm$bestTune
+
+gbm_dep<-predict(model_gbm, testset)
+
+gbm_summary<-get_result_stats(gbm_dep, testset$deposit)
+
+gbm_y<- predict(model_gbm, testset, type="prob")[,2]
+pred.gbm <- prediction(gbm_y, testset$deposit)
+gbm_auc = performance(pred.gbm, measure = "auc")
+
+all_results<-rbind(all_results, data.frame(method="Gradient Boost",
+                                           f1score=gbm_summary$f1score,
+                                           accuracy=gbm_summary$acc,
+                                           precision=gbm_summary$precision,
+                                           recall=gbm_summary$recall,
+                                           AUC=round(gbm_auc@y.values[[1]],6)))
+
+all_results%>%knitr::kable()
+```
+
+The gradient boosting algorithm which is also an ensemble model shows slight improvement in the area under the curve over the Random Forest model. 
+
+```{r gbm3}
+# plot ROC curve for different cutoff values
+roc.perf.gbm = performance(pred.gbm, measure = "tpr", x.measure = "fpr")
+plot(roc.perf.gbm, main="Gradient Boosting ROC Curve")
+abline(a=0, b= 1)
+```
+
+The ROC curve has moved into the upper left quadrant. The below graph overlays the KNN and GBM model ROC curves to clearly show the improvement.
+
+```{r gbm4}
+# plot of KNN ROC curve to compare performance
+plot(roc.perf.gbm, main="GBM & KNN ROC Curves")
+par(new=TRUE)
+plot(roc.perf.knn)
+abline(a=0, b= 1)
+```
+
+
+### 4.3.6 Model Results
+
+The final summary of all models shows that overall the Gradient Boost model shows the best performance with respect to area under the curve. Hence, this model has been chosen as the final model.
+
+```{r sum}
+all_results%>%knitr::kable()
+```
+
+To fine tune the model cut-off analysis has been performed. Cut-off Analysis basically analyzes the different cut-off levels that determine the class labels. In this case, there are two labels, hence default cutoff is 0.5. By sweeping different values of cut-off and measuring maximum Fscore the optimum cut-off value can be obtained. The user-defined function can be written as shown below.
+
+```{r cutoff}
+get_cutoff<-function(x){
+  
+  cutoff<-seq(0.1, 0.9, 0.025)
+  f1s<-sapply(cutoff, function(z){
+    y<-ifelse(x>z,1,0)
+    scores<-get_result_stats(y, testset$deposit)
+    scores$f1score
+  })
+  return(cutoff[which.max(f1s)])
+}
+```
+
+```{r cutoff2}
+
+final_cutoff<-get_cutoff(gbm_y) 
+
+final_y<-ifelse(gbm_y>final_cutoff,1,0)
+
+final_stats<-get_result_stats(final_y, testset$deposit)
+
+all_results<-rbind(all_results, 
+                   data.frame(method="Gradient Boost(Cut-off analysis)",
+                              f1score=final_stats$f1score,
+                              accuracy=final_stats$acc,
+                              precision=final_stats$precision,
+                              recall=final_stats$recall,
+                              AUC=round(gbm_auc@y.values[[1]],6)))
+
+all_results%>%knitr::kable()
+
+final_cutoff
+```
+
+The above table shows that the FScore has improved to 0.712. A cut-off value of 0.375 has given best Fscore. The GBM model with cutoff 0.375 is the final model that can be applied to new data to determine if a term deposit will be made.
+
+
+### 4.3.7 Evaluation Data Results
+
+The GBM model with cut-off 0.375 has been applied to the evaluation dataset and shown an accuracy of 0.7138 with FScore of 0.7136. These values are very close to the training/testing model and hence prove that the model is not over-trained or under-trained.
+
+```{r evalset}
+
+eval_y<- predict(model_gbm, evalset, type="prob")[,2]
+
+# Use cutoff obtained from GBM to define class labels
+evalset_deposit<-ifelse(eval_y>final_cutoff,1,0)
+
+# Get final summary for evaluation set
+final_summary<-get_result_stats(evalset_deposit, evalset$deposit)
+
+# Final summary of the evaluation of the model put in easy to read format
+data.frame(F1Score=final_summary$f1score, 
+           Accuracy=final_summary$acc, 
+           Precision=final_summary$precision, 
+           Recall=final_summary$recall)
+
+```
+
+\pagebreak
+
+# 5 Conclusion
+
+This section outlines the final summary of the project and future work.
+
+## 5.1 Summary
+
+Data analysis of the Portugese banking institution's dataset obtained from Kaggle website has shown that the marketing campaign can leverage the key insights generated to optimally target the customer base and effectively increase the term deposits.
+
+The Gradient Boosting algorithm has shown the best results with Fscore of 0.7136 for predicting if a person will do a term deposit. 
+
+
+## 5.2 Limitations
+
+One limitation of this analysis is that even though the model uses ensemble techniques, the accuracy is still around 72%. This may be primarily due to using a subset of the full dataset. The dataset on Kaggle website seems to be a subset of the original data uploaded to UCI Machine Learning Repository. This potentially impacts the robustness of the analysis.
+
+
+## 5.3 Future Work
+
+In order to further understand the behavior of customer choices for success and failure, competitive benchmarking data can also be included along with demographics. Also, to address the limitation of the analysis mentioned above, extending the analysis to include the full-set can increase robustness, predictive power and give further insights. 
+
+To increase the predictive power of the model, machine learning concepts like the SVM, Neural Networks and Ensemble model techniques like Stacking and Blending can be evaluated.
+
+
+# 6 References
+
+https://rafalab.github.io/dsbook/
+
+https://topepo.github.io/caret/available-models.html
+
+https://towardsdatascience.com/
+
+https://www.analyticsvidhya.com/
+
+https://machinelearningmastery.com/
 
